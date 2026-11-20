@@ -1,0 +1,6 @@
+/vendor/
+/app/config/config.local.php
+/public/uploads/*/*
+!/public/uploads/*/.gitkeep
+.DS_Store
+Thumbs.db

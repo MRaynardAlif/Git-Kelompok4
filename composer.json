@@ -1,0 +1,6 @@
+{
+    "name": "kelompok4/halalchain",
+    "require": {
+        "dompdf/dompdf": "^3.1"
+    }
+}
