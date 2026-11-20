@@ -33,8 +33,9 @@ CREATE TABLE pemasok (
     catatan_sertifikasi_halal TEXT,
     status                    ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
     CONSTRAINT fk_pemasok_usaha
-        FOREIGN KEY (id_usaha) REFERENCES usaha(id_usaha)
+        FOREIGN KEY (id_pemasok, id_usaha) REFERENCES pemasok(id_pemasok, id_usaha)
         ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT uq_pemasok_usaha UNIQUE (id_pemasok, id_usaha),
     INDEX idx_pemasok_usaha (id_usaha)
 ) ENGINE=InnoDB;
 
@@ -136,47 +137,55 @@ CREATE TABLE laporan_sjh (
 -- =====================================================================
 
 -- Status halal bahan: Halal / Belum Ada Sertifikat / Kedaluwarsa
-CREATE VIEW v_status_bahan AS
+CREATE OR REPLACE VIEW v_status_bahan AS
 SELECT b.id_bahan,
        b.id_usaha,
+       b.id_pemasok,
        b.nama_bahan,
        b.kategori,
        p.nama_pemasok,
+       b.no_sertifikat_halal,
+       b.foto_bahan,
        b.masa_berlaku,
        CASE
-           WHEN b.no_sertifikat_halal IS NULL        THEN 'Belum Ada Sertifikat'
-           WHEN b.masa_berlaku < CURRENT_DATE        THEN 'Kedaluwarsa'
+           WHEN b.no_sertifikat_halal IS NULL THEN 'Belum Ada Sertifikat'
+           WHEN b.masa_berlaku < CURRENT_DATE THEN 'Kedaluwarsa'
            ELSE 'Halal'
        END AS status_halal
 FROM bahan_baku b
 JOIN pemasok p ON p.id_pemasok = b.id_pemasok;
 
 -- Skor per kriteria: Ya = 1, Sebagian = 0.5, Tidak = 0
-CREATE VIEW v_skor_kriteria AS
-SELECT j.id_usaha,
+CREATE OR REPLACE VIEW v_skor_kriteria AS
+SELECT u.id_usaha,
        k.id_kriteria,
        k.nama_kriteria,
        ROUND(100 * SUM(CASE j.jawaban
                            WHEN 'Ya'       THEN 1
                            WHEN 'Sebagian' THEN 0.5
-                           ELSE 0 END) / COUNT(*), 0) AS skor_persen
-FROM jawaban_sjh j
-JOIN pertanyaan_sjh q ON q.id_pertanyaan = j.id_pertanyaan
-JOIN kriteria_sjh   k ON k.id_kriteria   = q.id_kriteria
-GROUP BY j.id_usaha, k.id_kriteria, k.nama_kriteria;
+                           ELSE 0 END) / COUNT(q.id_pertanyaan), 0) AS skor_persen
+FROM usaha u
+CROSS JOIN kriteria_sjh k
+JOIN pertanyaan_sjh q ON q.id_kriteria = k.id_kriteria
+LEFT JOIN jawaban_sjh j ON j.id_pertanyaan = q.id_pertanyaan
+                       AND j.id_usaha      = u.id_usaha
+GROUP BY u.id_usaha, k.id_kriteria, k.nama_kriteria;
 
 -- Kesiapan SJH keseluruhan per usaha
-CREATE VIEW v_kesiapan_sjh AS
+CREATE OR REPLACE VIEW v_kesiapan_sjh AS
 SELECT id_usaha, ROUND(AVG(skor_persen), 0) AS kesiapan_persen
 FROM v_skor_kriteria
 GROUP BY id_usaha;
 
 -- Jumlah bahan per pemasok (kolom "Jml Bahan" di layar Pemasok)
-CREATE VIEW v_jumlah_bahan_pemasok AS
-SELECT p.id_pemasok, p.nama_pemasok, COUNT(b.id_bahan) AS jml_bahan
+CREATE OR REPLACE VIEW v_jumlah_bahan_pemasok AS
+SELECT p.id_pemasok,
+       p.id_usaha,
+       p.nama_pemasok,
+       COUNT(b.id_bahan) AS jml_bahan
 FROM pemasok p
 LEFT JOIN bahan_baku b ON b.id_pemasok = p.id_pemasok
-GROUP BY p.id_pemasok, p.nama_pemasok;
+GROUP BY p.id_pemasok, p.id_usaha, p.nama_pemasok;
 
 -- =====================================================================
 -- DATA AWAL: 11 kriteria SJH (sesuai layar Checklist)
