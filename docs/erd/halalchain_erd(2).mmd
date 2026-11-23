@@ -1,0 +1,79 @@
+erDiagram
+  %% Acuan Aturan Pemetaan ERD ke Skema Relasional (Aturan 1 - 7):
+  %% Aturan 1: Entitas kuat dipetakan menjadi tabel dengan PK-nya.
+  %% Aturan 2: Entitas lemah dipetakan menjadi tabel dengan PK/FK pemiliknya.
+  %% Aturan 3: Relasi biner 1:1 dipetakan dengan menyertakan FK (atau menggabungkan tabel jika sesuai).
+  %% Aturan 4: Relasi biner 1:N dipetakan dengan menempatkan FK pada sisi N.
+  %% Aturan 5: Relasi biner M:N dipetakan menjadi tabel relasi baru dengan FK dari kedua entitas.
+  %% Aturan 6: Atribut bernilai banyak (multivalued) dipetakan menjadi tabel terpisah beserta FK.
+  %% Aturan 7: Relasi n-ary (derajat > 2) dipetakan menjadi tabel baru beserta FK tiap entitas terkait.
+
+  USAHA ||--o{ PEMASOK : "R1 - Aturan 4 (1:N)"
+  USAHA ||--o{ BAHAN_BAKU : "R2 - Aturan 4 (1:N)"
+  PEMASOK ||--o{ BAHAN_BAKU : "R3 - Aturan 4 (1:N)"
+  KRITERIA_SJH ||--o{ PERTANYAAN_SJH : "R4 - Aturan 4 (1:N)"
+  USAHA ||--o{ JAWABAN_SJH : "R5 - Aturan 4 (1:N)"
+  PERTANYAAN_SJH ||--o{ JAWABAN_SJH : "R6 - Aturan 4 (1:N)"
+  USAHA ||--o{ LAPORAN_SJH : "R7 - Aturan 4 (1:N)"
+
+  USAHA {
+    int id_usaha PK
+    string nama_usaha
+    string nama_pemilik
+    string email
+    string kata_sandi
+  }
+  KRITERIA_SJH {
+    int id_kriteria PK
+    string nama_kriteria
+  }
+  PERTANYAAN_SJH {
+    int id_pertanyaan PK
+    int id_kriteria FK
+    int nomor_urut
+    string teks_pertanyaan
+  }
+  PEMASOK {
+    int id_pemasok PK
+    int id_usaha FK
+    string nama_pemasok
+    string alamat
+    string kota
+    string telepon
+    string email
+    string catatan_sertifikasi_halal
+    string status
+  }
+  BAHAN_BAKU {
+    int id_bahan PK
+    int id_usaha FK
+    int id_pemasok FK
+    string nama_bahan
+    string kategori
+    string asal_negara_produsen
+    string no_sertifikat_halal
+    string lembaga_penerbit
+    date masa_berlaku
+    string foto_bahan
+    string dokumen_sertifikat
+    string catatan
+  }
+  JAWABAN_SJH {
+    int id_jawaban PK
+    int id_usaha FK
+    int id_pertanyaan FK
+    string jawaban
+    string catatan_bukti
+    date tanggal_isi
+  }
+  LAPORAN_SJH {
+    int id_laporan PK
+    int id_usaha FK
+    date tanggal_laporan
+    boolean sertakan_identitas
+    boolean sertakan_skor
+    boolean sertakan_rekomendasi
+    boolean sertakan_daftar_bahan
+    string rekomendasi_perbaikan
+    string file_pdf
+  }

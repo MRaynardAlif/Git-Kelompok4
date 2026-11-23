@@ -33,7 +33,7 @@ CREATE TABLE pemasok (
     catatan_sertifikasi_halal TEXT,
     status                    ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
     CONSTRAINT fk_pemasok_usaha
-        FOREIGN KEY (id_pemasok, id_usaha) REFERENCES pemasok(id_pemasok, id_usaha)
+        FOREIGN KEY (id_usaha) REFERENCES usaha(id_usaha)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT uq_pemasok_usaha UNIQUE (id_pemasok, id_usaha),
     INDEX idx_pemasok_usaha (id_usaha)
