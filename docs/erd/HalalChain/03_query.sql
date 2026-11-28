@@ -10,7 +10,7 @@ USE halalchain;
 -- Pertanyaan bisnis: Apa saja detail jawaban checklist SJH beserta nama
 --   kriteria, nomor urut, dan teks pertanyaannya untuk usaha tertentu?
 -- Halaman atau fitur: Checklist SJH & Laporan SJH (Checklist::formDataByBusiness / ReportController::answersByBusiness)
--- Jumlah baris hasil: 12 baris (untuk id_usaha = 1 pada data seed; bervariasi sesuai jawaban usaha)
+-- Jumlah baris hasil: 22 baris (untuk id_usaha = 1 pada data seed; bervariasi sesuai jawaban usaha)
 -- =====================================================================
 SELECT k.id_kriteria,
        k.nama_kriteria,
@@ -90,7 +90,7 @@ ORDER BY jumlah_bahan DESC, kategori ASC;
 -- Pertanyaan bisnis: Kriteria SJH mana saja pada usaha tertentu yang memiliki
 --   rata-rata nilai jawaban (Ya=2, Sebagian=1, Tidak=0) di bawah 1.50?
 -- Halaman atau fitur: Rekomendasi & Evaluasi Kesiapan SJH (ReportController::buildRecommendations / ChecklistController::index)
--- Jumlah baris hasil: 3 baris (untuk id_usaha = 1 pada data seed; bervariasi sesuai jawaban checklist)
+-- Jumlah baris hasil: 1 baris (untuk id_usaha = 1 pada data seed; bervariasi sesuai jawaban checklist)
 -- =====================================================================
 SELECT k.id_kriteria,
        k.nama_kriteria,
